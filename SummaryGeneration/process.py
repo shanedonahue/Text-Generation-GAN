@@ -30,20 +30,20 @@ def process(model_file, source_file, summary_file, output_emb_file, output_vocab
 
     print (f'{filter_cnt} samples are filtered out of {len(source)} by length limit')
 
-    
-    model = gensim.models.Word2Vec.load(model_file)
+    # model = gensim.models.Word2Vec.load(model_file)
 
     vocab = {'<END>': 0, '<START>': 1, '<NEXT>': 2, '<UNKNOWN>': 3}
     cnt = 4
 
     model = gensim.models.Word2Vec.load(model_file)
+    # print(model.wv.vocab)
 
     for idx, key in enumerate(model.wv.vocab):
         if not (key in vocab):
             vocab[key] = cnt
             cnt += 1
 
-    embedding = np.zeros((len(vocab), model.wv['hello'].shape[0]))
+    embedding = np.zeros((len(vocab), model.wv['assassination'].shape[0]))
 
     print (f'Vocabulary size: {len(vocab)}')
 
@@ -74,6 +74,7 @@ def process(model_file, source_file, summary_file, output_emb_file, output_vocab
     pickle.dump(doc, open(output_doc_file, 'wb'))
     pickle.dump(embedding, open(output_emb_file, 'wb'))
     pickle.dump(vocab, open(output_vocab_file, 'wb'))
+
 
 if __name__ == '__main__':
     process(model_file = './data/word2vec_sum.model',

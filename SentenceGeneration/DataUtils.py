@@ -7,15 +7,15 @@ def get_data_iterator(filenames, batch, sess, max_t = 40):
     
     def _map_func(example):
         features = {
-            'len': tf.FixedLenSequenceFeature(shape = [], dtype = tf.int64, allow_missing = True),
-            'index': tf.FixedLenSequenceFeature(shape = (max_t,), dtype = tf.int64, allow_missing = True)
+            'len': tf.io.FixedLenSequenceFeature(shape = [], dtype = tf.int64, allow_missing = True),
+            'index': tf.io.FixedLenSequenceFeature(shape = (max_t,), dtype = tf.int64, allow_missing = True)
         }
         
-        parsed_features = tf.parse_single_example(example, features)
+        parsed_features = tf.io.parse_single_example(serialized=example, features=features)
         parsed_features['index'] = tf.reshape(parsed_features['index'], (max_t,))
         return parsed_features
     
-    _filenames = tf.placeholder(tf.string, shape = [None])
+    _filenames = tf.compat.v1.placeholder(tf.string, shape = [None])
     
     _dataset = tf.data.TFRecordDataset(filenames)
     
@@ -25,7 +25,7 @@ def get_data_iterator(filenames, batch, sess, max_t = 40):
     _dataset = _dataset.map(_map_func)
     _dataset = _dataset.repeat()
     _dataset = _dataset.batch(batch)
-    iterator = _dataset.make_initializable_iterator()
+    iterator = tf.compat.v1.data.make_initializable_iterator(_dataset)
     
     sess.run(iterator.initializer, feed_dict={_filenames: filenames})
     return iterator
@@ -57,7 +57,7 @@ def get_train_test_iter(template, p, batch, sess):
     return get_data_iterator(train_files, batch, sess)
 
 if __name__ == '__main__':
-    sess = tf.Session()
+    sess = tf.compat.v1.Session()
     filenames = [f'../data/data_t=40.tfrecord']
     iterator = get_data_iterator(filenames, 2, sess, 40)
     for i in range(10):
@@ -65,4 +65,3 @@ if __name__ == '__main__':
         print (f"index shape: {x['index'].shape}")
         print (f"index: {x['index']}")
         print (f"len: {x['len']}")
-        

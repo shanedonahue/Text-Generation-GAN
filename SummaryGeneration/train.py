@@ -2,11 +2,12 @@ import tensorflow as tf
 import sys
 import numpy as np
 from data import Data
-from model import Model
+from model import SummaryModel
 import argparse
 import os
 
-tf.logging.set_verbosity('ERROR')
+tf.compat.v1.disable_eager_execution()
+tf.compat.v1.logging.set_verbosity('ERROR')
 
 parser = argparse.ArgumentParser(description = 'Train/Test summarization model', formatter_class = argparse.ArgumentDefaultsHelpFormatter)
 
@@ -31,19 +32,19 @@ parser.add_argument("--save_interval", type = int, default = 1250, help = "Save 
 parser.add_argument("--batch_size", type = int, default = 16, help = 'number of samples in one batch')
 parser.add_argument("--gen_lr", type = float, default = 1e-3, help = 'learning rate for generator')
 parser.add_argument("--dis_lr", type = float, default = 1e-3, help = 'learning rate for discriminator')
+parser.add_argument("--cov_weight", type = float, default = 1e-3, help = 'learning rate for coverage')
 
 if __name__ == '__main__':
 
     params = vars(parser.parse_args(sys.argv[1:]))
     print (params)
-    
-    model = Model(**params)
+
+    model = SummaryModel(**params)
     data = Data(**params)
-    
+
     test_generator = data.get_next_epoch_test()
 
     for i in range(10):
         print (f'Training Epoch {i}...')
         generator = data.get_next_epoch()
         model.train_one_epoch(generator)
-    
