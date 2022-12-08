@@ -3,6 +3,7 @@ import numpy as np
 import pickle
 from datetime import date
 from tqdm import tqdm_notebook
+import tqdm
 import re
 import copy
 from numba import cuda
@@ -111,14 +112,14 @@ class SummaryModel:
         self._load_data()
 
         # Model Structure
-        self.num_unit = 256
-        self.dim_v = 16
+        self.num_unit = 16 # 256
+        self.dim_v = 4 # 16
         self.vocab_dim = self.emb_np.shape[0]
         self.final_dim = self.emb_np.shape[0] + args['max_oov_bucket']
         self.emb_np = np.concatenate((self.emb_np, np.zeros((self.final_dim - self.vocab_dim, self.emb_dim))), axis=0)
         self.max_src_time = args['src_time']
         self.max_sum_time = args['sum_time']
-        self.beam = 16
+        self.beam = 4 # 16
 
         # Hyperparamter
         self.batch_size = args['batch_size']
@@ -130,8 +131,8 @@ class SummaryModel:
         self._construct_encoder()
         self._construct_decoder()
 
-        self.fake_sum = tf.nn.embedding_lookup(params=self.emb, ids=self.tokens)
         self.real_sum = tf.nn.embedding_lookup(params=self.emb, ids=self.sum2finalidx)
+        self.fake_sum = tf.nn.embedding_lookup(params=self.emb, ids=self.tokens)
 
         self.real_reward = self._construct_discriminator(self.real_sum, self.sum_len)
         self.fake_reward = self._construct_discriminator(self.fake_sum, tf.cast(self.tokens_len, tf.int32))
@@ -152,8 +153,7 @@ class SummaryModel:
         # self.saver = tf.train.Saver(allow_empty = True, name = f'Pointer_{date.today().strftime("_%m_%d")}', var_list = all_variable)
         self.saver = tf.compat.v1.train.Saver(allow_empty=True, name=f'Pointer_{date.today().strftime("_%m_%d")}')
 
-        if args['load_pretrain']:
-
+        if ('load_pretrain' in args) and args['load_pretrain']:
             all_variable = tf.compat.v1.all_variables()
             all_variable = filter_variables(all_variable,
                                             exclude_patterns=['discriminator', 'baseline'])
@@ -543,7 +543,7 @@ class SummaryModel:
                                    false_fn=lambda: self.final_pri_loss)
 
         self.supervised_opt = tf.compat.v1.train.AdamOptimizer(self.gen_lr).minimize(self.target_loss,
-                                                                                     var_list=var_enc + var_dec,
+                                                                                     var_list=var_dec + var_dec,
                                                                                      global_step=self.gen_global_step)
 
         # GAN Part
@@ -850,7 +850,7 @@ class SummaryModel:
                 None
         '''
         step = self.sess.run(self.gen_global_step)
-        for feed_dict in tqdm_notebook(generator, total=total_n_batch):
+        for feed_dict in tqdm_notebook(generator, total=total_n_batch, display=True):
             feed_dict['coverage_on:0'] = coverage_on
             self.sess.run(self.supervised_opt, feed_dict=feed_dict)
             step += 1
