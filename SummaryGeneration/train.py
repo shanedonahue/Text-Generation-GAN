@@ -18,7 +18,7 @@ parser.add_argument("--emb_file", type = str, default = './data/emb.p', help = '
 parser.add_argument("--src_time", type = int, default = 1000, help = 'maximal # of time steps in source text')
 parser.add_argument("--sum_time", type = int, default = 120, help = 'maximal # of time steps in summary')
 parser.add_argument("--max_oov_bucket", type = int, default = 280, help = 'maximal # of out-of-vocabulary word in one summary')
-parser.add_argument("--train_ratio", type = float, default = 0.9, help = 'ratio of training data')
+parser.add_argument("--train_ratio", type = float, default = 0.1, help = 'ratio of training data')
 parser.add_argument("--seed", type = int, default = 888, help = 'seed for spliting data')
 
 # Saving Setting
@@ -47,4 +47,11 @@ if __name__ == '__main__':
     for i in range(10):
         print (f'Training Epoch {i}...')
         generator = data.get_next_epoch()
-        model.train_one_epoch(generator)
+        # without coverage
+        model.train_one_epoch(generator, data.n_train_batch, coverage_on=False)
+        # with coverage
+        # model.train_one_epoch(generator, data.n_train_batch, coverage_on = True, model_name = 'with_coverage')
+        # Pre-train Disciminator
+        #
+        # model.train_one_epoch_pre_dis(train_data, data.n_train_batch, coverage_on=True)
+        # model.train_one_epoch(generator, data.n_train_batch)
