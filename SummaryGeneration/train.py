@@ -37,7 +37,7 @@ parser.add_argument("--cov_weight", type = float, default = 1e-3, help = 'learni
 if __name__ == '__main__':
 
     params = vars(parser.parse_args(sys.argv[1:]))
-    print (params)
+    print(params)
 
     model = SummaryModel(**params)
     data = Data(**params)
@@ -45,7 +45,7 @@ if __name__ == '__main__':
     test_generator = data.get_next_epoch_test()
 
     for i in range(10):
-        print (f'Training Epoch {i}...')
+        print(f'Training Epoch {i}...')
         generator = data.get_next_epoch()
         # without coverage
         model.train_one_epoch(generator, data.n_train_batch, coverage_on=False)

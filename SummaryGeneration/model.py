@@ -112,8 +112,8 @@ class SummaryModel:
         self._load_data()
 
         # Model Structure
-        self.num_unit = 16 # 256
-        self.dim_v = 4 # 16
+        self.num_unit = 256
+        self.dim_v = 16
         self.vocab_dim = self.emb_np.shape[0]
         self.final_dim = self.emb_np.shape[0] + args['max_oov_bucket']
         self.emb_np = np.concatenate((self.emb_np, np.zeros((self.final_dim - self.vocab_dim, self.emb_dim))), axis=0)
@@ -543,7 +543,7 @@ class SummaryModel:
                                    false_fn=lambda: self.final_pri_loss)
 
         self.supervised_opt = tf.compat.v1.train.AdamOptimizer(self.gen_lr).minimize(self.target_loss,
-                                                                                     var_list=var_dec + var_dec,
+                                                                                     var_list=var_enc + var_dec,
                                                                                      global_step=self.gen_global_step)
 
         # GAN Part
