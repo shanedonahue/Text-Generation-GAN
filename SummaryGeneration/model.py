@@ -112,14 +112,14 @@ class SummaryModel:
         self._load_data()
 
         # Model Structure
-        self.num_unit = 256
-        self.dim_v = 16
+        self.num_unit = 128 # 256
+        self.dim_v = 4 # 16
         self.vocab_dim = self.emb_np.shape[0]
         self.final_dim = self.emb_np.shape[0] + args['max_oov_bucket']
         self.emb_np = np.concatenate((self.emb_np, np.zeros((self.final_dim - self.vocab_dim, self.emb_dim))), axis=0)
         self.max_src_time = args['src_time']
         self.max_sum_time = args['sum_time']
-        self.beam = 4 # 16
+        self.beam = 4 # 16 # for efficiency
 
         # Hyperparamter
         self.batch_size = args['batch_size']
@@ -265,7 +265,7 @@ class SummaryModel:
             self.atten_mask = tf.sequence_mask(self.src_len, self.max_src_time, dtype=tf.float32)
             '''
             self._coverage_filter = tf.Variable(tf.random.uniform([1, self.batch_size], -1, 1, dtype = tf.float32), name = 'single_cov_filter')
-            self.coverage_fitler = tf.tile(self._coverage_filter, [self.atten_mask.get_shape()[0], 1])
+            self.coverage_fitler = tf.tile(self._cove rage_filter, [self.atten_mask.get_shape()[0], 1])
             '''
             # For Vocabulary Distribution
             self.linear_vocab_1 = tf.compat.v1.layers.Dense(self.num_unit * 2, activation=tf.nn.leaky_relu,
@@ -459,9 +459,9 @@ class SummaryModel:
         with tf.compat.v1.variable_scope('discriminator', reuse=tf.compat.v1.AUTO_REUSE):
             # LSTM Classifier
             with tf.compat.v1.variable_scope('lstm', reuse=tf.compat.v1.AUTO_REUSE):
-                self.dis_enc_unit = tf.keras.layers.LSTMCell(self.num_unit, name='dis_enc_unit')
+                self.dis_enc_unit = tf.compat.v1.nn.rnn_cell.LSTMCell(self.num_unit, name='dis_enc_unit')
                 # self.dis_enc_bw_unit = tf.nn.rnn_cell.LSTMCell(self.num_unit, name = 'dis_enc_bw_unit')
-                self.dis_dec_unit = tf.keras.layers.LSTMCell(self.num_unit, name='dis_dec_unit')
+                self.dis_dec_unit = tf.compat.v1.nn.rnn_cell.LSTMCell(self.num_unit, name='dis_dec_unit')
 
                 _, state = tf.compat.v1.nn.dynamic_rnn(self.dis_enc_unit, self.emb_input, sequence_length=self.src_len,
                                                        swap_memory=False, dtype=tf.float32)
@@ -543,7 +543,7 @@ class SummaryModel:
                                    false_fn=lambda: self.final_pri_loss)
 
         self.supervised_opt = tf.compat.v1.train.AdamOptimizer(self.gen_lr).minimize(self.target_loss,
-                                                                                     var_list=var_enc + var_dec,
+                                                                                     var_list=var_dec + var_dec,
                                                                                      global_step=self.gen_global_step)
 
         # GAN Part
@@ -796,7 +796,7 @@ class SummaryModel:
                 index = [-1, -1]
                 for j in range(self.beam):
                     for k in range(self.max_sum_time - 1):
-                        if (val[i, j, k] / (k + 1) > best_val) and (seq[i, j, k + 1] == 0):
+                        if (val[i, j, k] / (k + 1) > best_val) and (seq[i, j, 0] == 0):
                             best_val = val[i, j, k] / (k + 1)
                             index = [j, k + 1]
                 tokens = []
