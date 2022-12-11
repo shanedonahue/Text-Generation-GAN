@@ -17,7 +17,7 @@ def process(model_file, source_file, summary_file, output_emb_file, output_vocab
 
     source = pickle.load(open(source_file, 'rb'))
     summary = pickle.load(open(summary_file, 'rb'))
-
+    print(source[0], summary[0])
     doc = []
 
     filter_cnt = 0
@@ -38,7 +38,7 @@ def process(model_file, source_file, summary_file, output_emb_file, output_vocab
     model = gensim.models.Word2Vec.load(model_file)
     # print(model.wv.vocab)
 
-    for idx, key in enumerate(model.wv.vocab):
+    for idx, key in enumerate(model.wv.key_to_index):
         if not (key in vocab):
             vocab[key] = cnt
             cnt += 1
@@ -77,7 +77,7 @@ def process(model_file, source_file, summary_file, output_emb_file, output_vocab
 
 
 if __name__ == '__main__':
-    process(model_file = './data/word2vec_sum.model',
+    process(model_file = './data/glove_word2vec_50d.model',
         source_file = './data/doc_source.p',
         summary_file = './data/doc_summary.p',
         output_emb_file = './data/emb.p',
