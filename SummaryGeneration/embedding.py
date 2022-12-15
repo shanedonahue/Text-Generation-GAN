@@ -13,7 +13,7 @@ def main():
     # load dataset
     df = pd.read_csv("./data/dfPreProcessed.csv")
     # extract training data, the abstract is our source text and title our summary
-    df_train = df[["abstract", "title"]].astype(str).sample(frac=.25)   # abstract predicts title
+    df_train = df[["abstract", "title"]].astype(str)   # abstract predicts title
 
     doc_source = df_train['abstract'].tolist()
     doc_summary = df_train['title'].tolist()
@@ -24,48 +24,48 @@ def main():
     with open('./data/doc_summary.p', 'wb') as summary_file:
         pickle.dump(doc_summary, summary_file)
 
-    # texts = doc_source.copy()
-    # texts.extend(doc_summary)
-    # print(texts[0:10])
-    # sentences = []
-    # for i in range(len(texts)):
-    #     sentences.append(sent_tokenize(texts[i]))
-    #
-    # sents = []
-    # for sentence_list in sentences:
-    #     for sentence in sentence_list:
-    #         sents.append(word_tokenize(sentence))
-    #
-    # print(sents[0:3])
-    #
-    # model = Word2Vec(vector_size=50, min_count=1)
-    # model.build_vocab(sents)
-    # total_examples = model.corpus_count
-    # print(total_examples)
-    # # Save the vocab of your dataset
-    # vocab = list(model.wv.key_to_index.keys())
-    # print(vocab[0])
-    #
-    # pretrained_path = "./glove/glove.6B.50d.word2vec.txt"
-    # glove2word2vec("./glove/glove.6B/glove.6B.50d.txt", pretrained_path)
-    # glove_model_wv = KeyedVectors.load_word2vec_format(pretrained_path, binary=False)
-    #
-    # print(glove_model_wv.most_similar("cats"))
-    #
-    # # Add the pre-trained model vocabulary
-    # model.build_vocab([list(glove_model_wv.key_to_index.keys())], update=True)
-    #
-    # # Load the pre-trained models embeddings
-    # # note: if a word doesn't exist in the pre-trained vocabulary then it is left as is in the original model
-    # model.wv.vectors_lockf = np.ones(len(model.wv))
-    # model.wv.intersect_word2vec_format(pretrained_path, binary=False, lockf=1.0)
-    #
-    # model.train(sents, total_examples=total_examples, epochs=model.epochs)
-    #
-    # print(model.wv.most_similar("cats"))
-    #
-    # # save model and data
-    # model.save("./data/glove_word2vec_50d.model")
+    texts = doc_source.copy()
+    texts.extend(doc_summary)
+    print(texts[0:10])
+    sentences = []
+    for i in range(len(texts)):
+        sentences.append(sent_tokenize(texts[i]))
+
+    sents = []
+    for sentence_list in sentences:
+        for sentence in sentence_list:
+            sents.append(word_tokenize(sentence))
+
+    print(sents[0:3])
+
+    model = Word2Vec(vector_size=50, min_count=1)
+    model.build_vocab(sents)
+    total_examples = model.corpus_count
+    print(total_examples)
+    # Save the vocab of your dataset
+    vocab = list(model.wv.key_to_index.keys())
+    print(vocab[0])
+
+    pretrained_path = "./glove/glove.6B.50d.word2vec.txt"
+    # glove2word2vec("./glove/glove.6B.50d.txt", pretrained_path)
+    glove_model_wv = KeyedVectors.load_word2vec_format(pretrained_path, binary=False)
+
+    print(glove_model_wv.most_similar("cats"))
+
+    # Add the pre-trained model vocabulary
+    model.build_vocab([list(glove_model_wv.key_to_index.keys())], update=True)
+
+    # Load the pre-trained models embeddings
+    # note: if a word doesn't exist in the pre-trained vocabulary then it is left as is in the original model
+    model.wv.vectors_lockf = np.ones(len(model.wv))
+    model.wv.intersect_word2vec_format(pretrained_path, binary=False, lockf=1.0)
+
+    model.train(sents, total_examples=total_examples, epochs=model.epochs)
+
+    print(model.wv.most_similar("cats"))
+
+    # save model and data
+    model.save("./data/glove_word2vec_50d.model")
 
 
 
