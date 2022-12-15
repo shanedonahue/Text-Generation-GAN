@@ -15,10 +15,10 @@ parser = argparse.ArgumentParser(description = 'Train/Test summarization model',
 parser.add_argument("--doc_file", type = str, default = './data/doc.p', help = 'path to document file')
 parser.add_argument("--vocab_file", type = str, default = './data/vocab.p', help = 'path to vocabulary file')
 parser.add_argument("--emb_file", type = str, default = './data/emb.p', help = 'path to embedding file')
-parser.add_argument("--src_time", type = int, default = 1000, help = 'maximal # of time steps in source text')
-parser.add_argument("--sum_time", type = int, default = 120, help = 'maximal # of time steps in summary')
+parser.add_argument("--src_time", type = int, default = 200, help = 'maximal # of time steps in source text')
+parser.add_argument("--sum_time", type = int, default = 50, help = 'maximal # of time steps in summary')
 parser.add_argument("--max_oov_bucket", type = int, default = 280, help = 'maximal # of out-of-vocabulary word in one summary')
-parser.add_argument("--train_ratio", type = float, default = 0.1, help = 'ratio of training data')
+parser.add_argument("--train_ratio", type = float, default = 0.8, help = 'ratio of training data')
 parser.add_argument("--seed", type = int, default = 888, help = 'seed for spliting data')
 
 # Saving Setting
@@ -44,7 +44,7 @@ if __name__ == '__main__':
 
     test_generator = data.get_next_epoch_test()
 
-    for i in range(10):
+    for i in range(1):
         print(f'Training Epoch {i}...')
         generator = data.get_next_epoch()
         # without coverage
@@ -55,3 +55,16 @@ if __name__ == '__main__':
         #
         # model.train_one_epoch_pre_dis(train_data, data.n_train_batch, coverage_on=True)
         # model.train_one_epoch(generator, data.n_train_batch)
+    train_data = data.get_next_epoch()
+    test_data = data.get_next_epoch_test()
+
+    for feed_dict in test_data:
+        tokens, scores, attens = model.beam_search(feed_dict)
+        src, ref, gen = data.id2word(feed_dict, tokens)
+        gt_attens = model.sess.run(model.atten_dist, feed_dict=feed_dict)
+        x = 0
+        print("".join(src[x]), end='\n\n')
+        print("".join(ref[x]), end='\n\n')
+        print("".join(gen[x]), end='\n\n')
+        print(scores[x])
+        break
