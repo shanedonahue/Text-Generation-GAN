@@ -822,7 +822,7 @@ class SummaryModel:
                     index = [-1, -1]
                     for j in range(self.beam):
                         for k in range(self.max_sum_time - 1):
-                            if (val[i, j, k] / (k + 1) > best_val) and (seq[i, j, k + 1] == 0) and (
+                            if (val[i, j, k] / (k + 1) > best_val) and (seq[i, j, 0] == 0) and (
                                     val[i, j, k] / (k + 1) < last_best - 1e-10):
                                 best_val = val[i, j, k] / (k + 1)
                                 index = [j, k + 1]
