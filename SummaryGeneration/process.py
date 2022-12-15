@@ -17,9 +17,9 @@ def process(model_file, source_file, summary_file, output_emb_file, output_vocab
 
     source = pickle.load(open(source_file, 'rb'))
     summary = pickle.load(open(summary_file, 'rb'))
-    print(source[0], summary[0])
+    print(source[0:10])
+    print(summary[0:10])
     doc = []
-
     filter_cnt = 0
 
     for i in range(len(source)):
@@ -68,7 +68,7 @@ def process(model_file, source_file, summary_file, output_emb_file, output_vocab
         else:
             i += 1
     
-    print (f'{invalid_cnt} samples are filtered out among {len(doc) + invalid_cnt} by OOV')
+    print (f'{invalid_cnt} samples are filtered out among {len(doc)} by OOV')
 
 
     pickle.dump(doc, open(output_doc_file, 'wb'))
@@ -83,7 +83,7 @@ if __name__ == '__main__':
         output_emb_file = './data/emb.p',
         output_doc_file = './data/doc.p',
         output_vocab_file = './data/vocab.p',
-        min_time_source = 100, 
-        max_time_source = 1000,
-        min_time_summary = 10,
-        max_time_summary = 120)
+        min_time_source = 1,
+        max_time_source = 200,
+        min_time_summary = 1,
+        max_time_summary = 50)
